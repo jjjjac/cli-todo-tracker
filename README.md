@@ -1,15 +1,14 @@
-o# CLI To-Do Tracker 📝
+# CLI To-Do Tracker
 
 A simple Python command-line to-do tracker.
 
 ## Features
-- Add a task
-- List all tasks
-- Mark a task as done
-- Save tasks to a JSON file
+- Add tasks
+- Mark tasks as done
+- List tasks with ✅ or ❌
 
-## Usage (planned)
+## Usage
 ```bash
-python tracker.py add "Buy groceries"
 python tracker.py list
-python tracker.py done 2
+python tracker.py add "Buy milk"
+python tracker.py done 0
