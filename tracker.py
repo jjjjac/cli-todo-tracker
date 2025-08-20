@@ -1,33 +1,51 @@
-import sys, json
-from pathlib import Path
+import json, os, sys
 
-TASKS_FILE = Path("tasks.json")
+DATA = "tasks.json"
 
-def load_tasks():
-    if TASKS_FILE.exists():
-        return json.loads(TASKS_FILE.read_text())
-    return []
+def load():
+    return json.loads(open(DATA).read()) if os.path.exists(DATA) else []
 
-def save_tasks(tasks):
-    TASKS_FILE.write_text(json.dumps(tasks, indent=2))
+def save(ts):
+    with open(DATA, "w") as f:
+        json.dump(ts, f, indent=2)
 
-def add_task(title):
-    tasks = load_tasks()
-    tasks.append({"title": title, "done": False})
-    save_tasks(tasks)
-    print(f"✅ Task added: {title}")
+def list_cmd():
+    ts = load()
+    if not ts:
+        print("No tasks.")
+        return
+    for i, t in enumerate(ts):
+        mark = "✅" if t.get("done") else "❌"
+        print(f"{i}. {mark} {t['title']}")
 
-def print_usage():
-    print("Usage:\n  python tracker.py add \"Task title\"")
+def add_cmd(title):
+    ts = load()
+    ts.append({"title": title, "done": False})
+    save(ts)
+    print(f"Added: {title}")
+
+def done_cmd(index):
+    ts = load()
+    i = int(index)
+    if i < 0 or i >= len(ts):
+        print(f"Bad index {index}")
+        return
+    ts[i]["done"] = True
+    save(ts)
+    print(f"Done: {ts[i]['title']}")
+
+def help_cmd():
+    print("Usage:")
+    print("  python tracker.py list")
+    print('  python tracker.py add "Buy milk"')
+    print("  python tracker.py done 0")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print_usage(); sys.exit(1)
-    cmd = sys.argv[1]
-    if cmd == "add":
-        if len(sys.argv) < 3:
-            print("Error: No task title provided."); print_usage(); sys.exit(1)
-        title = " ".join(sys.argv[2:])
-        add_task(title)
-    else:
-        print(f"Unknown command: {cmd}"); print_usage(); sys.exit(1)
+    args = sys.argv[1:]
+    if not args:
+        help_cmd(); sys.exit(0)
+    cmd, *rest = args
+    if cmd == "list": list_cmd()
+    elif cmd == "add": add_cmd(" ".join(rest) or "Untitled")
+    elif cmd == "done": done_cmd(rest[0] if rest else "-1")
+    else: help_cmd()
